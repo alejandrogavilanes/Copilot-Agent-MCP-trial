@@ -2,7 +2,7 @@ import pkg from 'pg';
 const { Pool } = pkg;
 
 const pool = new Pool({
-  connectionString: process.env.DB_CONNECTION || 'postgresql://postgres:LinuxRocks01@localhost:5432/link-page-db'
+  connectionString: process.env.DB_CONNECTION || 'postgresql://postgres:postgres@localhost:5432/link-page-db'
 });
 
 export async function query(text: string, params?: any[]) {

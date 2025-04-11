@@ -1,0 +1,8 @@
+digraph INFRA {
+  node [ color = "black", fillcolor = "#E6E6E6", height =1, style = "filled,bold,rounded", fontname = "Arial" ];
+  "PostgreSQL Database" [ label = "PostgreSQL Database
+(AWS::RDS::DBInstance)", shape =cylinder, fillcolor = "#FFCFB3" ];
+  "Link Validation Service" [ label = "Link Validation Service
+(AWS::Lambda::Function)", shape =rectangle, fillcolor = "#B7E0FF" ];
+  "Link Validation Service" -> "PostgreSQL Database";
+}

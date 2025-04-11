@@ -8,7 +8,7 @@ const { Pool } = pkg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const connectionString = process.env.DB_CONNECTION || 'postgresql://postgres:LinuxRocks01@localhost:5432/link-page-db';
+const connectionString = process.env.DB_CONNECTION || 'postgresql://postgres:postgres@localhost:5432/link-page-db';
 
 async function setupDatabase() {
     const pool = new Pool({ connectionString });
