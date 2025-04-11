@@ -1,5 +1,5 @@
 {
-  "name": "links-urls-agent-mcp-demo",
+  "name": "@amzn/links-urls-agent-mcp-demo",
   "type": "module",
   "version": "0.0.1",
   "scripts": {

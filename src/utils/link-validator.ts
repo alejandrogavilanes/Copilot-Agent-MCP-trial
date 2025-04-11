@@ -19,10 +19,11 @@ export async function validateLink(url: string): Promise<{ status: string; statu
         return { status: 'error', statusCode: response.status };
       }
     } catch (error) {
-      console.error(`Failed to validate link ${url}:`, error);
+      console.error('Failed to validate link:', url, error); // Fixed line
       return { 
         status: 'error',
         statusCode: error instanceof TypeError && error.name === 'TimeoutError' ? 408 : undefined
+
       };
     }
   });

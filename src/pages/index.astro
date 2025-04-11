@@ -9,9 +9,10 @@ if (Astro.request.method === 'POST') {
     const data = await Astro.request.formData();
     const title = data.get('title')?.toString();
     const description = data.get('description')?.toString();
+    const customSlug = data.get('customSlug')?.toString();
     
     if (title) {
-      const list = await createList(title, description);
+      const list = await createList(title, description, customSlug);
       return Astro.redirect(`/lists/${list.slug}`);
     }
   } catch (e) {
@@ -53,6 +54,26 @@ if (Astro.request.method === 'POST') {
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500"
               placeholder="My Awesome Links"
             />
+          </div>
+
+          <div>
+            <label for="customSlug" class="block text-sm font-medium text-gray-700">
+              Custom URL (optional)
+            </label>
+            <div class="mt-1 flex rounded-md shadow-sm">
+              <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                /lists/
+              </span>
+              <input
+                type="text"
+                name="customSlug"
+                id="customSlug"
+                pattern="[a-zA-Z0-9-]+"
+                class="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:border-brand-500 focus:ring-brand-500 sm:text-sm"
+                placeholder="my-awesome-list"
+              />
+            </div>
+            <p class="mt-1 text-sm text-gray-500">Only letters, numbers, and hyphens allowed. Leave empty for auto-generated URL.</p>
           </div>
 
           <div>

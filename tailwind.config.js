@@ -1,4 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+const typography = require('@tailwindcss/typography');
+const forms = require('@tailwindcss/forms');
+
 module.exports = {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   theme: {
@@ -22,7 +25,7 @@ module.exports = {
     },
   },
   plugins: [
-    require('@tailwindcss/typography'),
-    require('@tailwindcss/forms'),
+    typography,
+    forms,
   ],
 }

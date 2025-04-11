@@ -1,11 +1,14 @@
 import pkg from 'pg';
 const { Pool } = pkg;
+import type { QueryResult } from 'pg';
 
 const pool = new Pool({
   connectionString: process.env.DB_CONNECTION || 'postgresql://postgres:postgres@localhost:5432/link-page-db'
 });
 
-export async function query(text: string, params?: any[]) {
+export type QueryResultType<T> = Promise<QueryResult<T>>;
+
+export async function query<T = any>(text: string, params?: unknown[]): QueryResultType<T> {
   const client = await pool.connect();
   try {
     return await client.query(text, params);

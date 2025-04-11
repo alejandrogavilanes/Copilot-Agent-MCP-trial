@@ -1,7 +1,8 @@
-import { atom, map } from 'nanostores';
+import { atom } from 'nanostores';
 import { nanoid } from 'nanoid';
 import slugify from 'slugify';
 import { query } from '../utils/db';
+import type { QueryConfig } from 'pg';
 import { fetchUrlMetadata } from '../utils/metadata';
 import type { LinkList, Link, Tag, SearchResult } from '../utils/db';
 
@@ -11,9 +12,9 @@ export const currentLinks = atom<Link[]>([]);
 export const currentTags = atom<Tag[]>([]);
 
 // List Management
-export async function createList(title: string, description?: string | null): Promise<LinkList> {
-  const slug = generateSlug(title);
-  const result = await query(
+export async function createList(title: string, description?: string | null, customSlug?: string | null): Promise<LinkList> {
+  const slug = customSlug ? slugify(customSlug, { lower: true, strict: true }) : generateSlug(title);
+  const result = await query<LinkList>(
     'INSERT INTO link_lists (title, description, slug) VALUES ($1, $2, $3) RETURNING *',
     [title, description, slug]
   );
@@ -45,6 +46,25 @@ export async function deleteList(id: string): Promise<void> {
 }
 
 // Link Management
+export async function loadLinksForList(listId: string): Promise<Link[]> {
+  try {
+    const result = await query(
+      'SELECT l.*, array_agg(t.*) as tags FROM links l LEFT JOIN link_tags lt ON lt.link_id = l.id LEFT JOIN tags t ON t.id = lt.tag_id WHERE l.list_id = $1 GROUP BY l.id ORDER BY l.order_index',
+      [listId]
+    );
+    
+    const links = result.rows.map(row => ({
+      ...row,
+      tags: row.tags[0] ? row.tags : []
+    }));
+    currentLinks.set(links);
+    return links;
+  } catch (error) {
+    console.error('Failed to load links:', error);
+    throw new Error('Failed to load links. Please try again later.');
+  }
+}
+
 export async function addLink(listId: string, url: string): Promise<Link> {
   const metadata = await fetchUrlMetadata(url);
   
@@ -178,27 +198,21 @@ export async function removeTag(linkId: string, tagId: string): Promise<void> {
 }
 
 export async function loadTagsForLink(linkId: string): Promise<Tag[]> {
-  const result = await query(`
-    SELECT t.* 
-    FROM tags t
-    JOIN link_tags lt ON lt.tag_id = t.id
-    WHERE lt.link_id = $1
-    ORDER BY t.name
-  `, [linkId]);
+  const result = await query(
+    'SELECT t.* FROM tags t JOIN link_tags lt ON lt.tag_id = t.id WHERE lt.link_id = $1 ORDER BY t.name',
+    [linkId]
+  );
   return result.rows;
 }
 
 // Search functionality
 export async function searchLinks(listId: string, query: string): Promise<SearchResult[]> {
-  const result = await query(`
-    SELECT l.*, ts_rank(l.search_vector, websearch_to_tsquery('english', $1)) as rank
-    FROM links l
-    WHERE l.list_id = $2 
-    AND l.search_vector @@ websearch_to_tsquery('english', $1)
-    ORDER BY rank DESC
-  `, [query, listId]);
+  const result = await query(
+    'SELECT l.*, ts_rank(l.search_vector, websearch_to_tsquery(\'english\', $1)) as rank FROM links l WHERE l.list_id = $2 AND l.search_vector @@ websearch_to_tsquery(\'english\', $1) ORDER BY rank DESC',
+    [query, listId]
+  );
   
-  return result.rows.map(row => ({
+  return result.rows.map((row: any) => ({
     link: {
       id: row.id,
       list_id: row.list_id,
