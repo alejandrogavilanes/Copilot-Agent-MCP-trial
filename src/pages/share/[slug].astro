@@ -1,0 +1,75 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { query } from '../../utils/db';
+import type { Link } from '../../utils/db';
+
+const { slug } = Astro.params;
+
+// Load the list and its links
+const listResult = await query(`
+  SELECT * FROM link_lists 
+  WHERE slug = $1 AND is_published = true
+`, [slug]);
+
+if (listResult.rows.length === 0) {
+  return Astro.redirect('/404');
+}
+
+const list = listResult.rows[0];
+
+const linksResult = await query(`
+  SELECT * FROM links 
+  WHERE list_id = $1 
+  ORDER BY order_index
+`, [list.id]);
+
+const links: Link[] = linksResult.rows;
+---
+
+<Layout title={list.title || 'Shared List'}>
+  <main class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="space-y-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">{list.title || 'Shared List'}</h1>
+        {list.description && (
+          <p class="mt-2 text-gray-600">{list.description}</p>
+        )}
+      </div>
+
+      <div class="bg-white shadow-sm rounded-lg p-6">
+        <ul class="space-y-2">
+          {links.map((link) => (
+            <li class="flex items-center gap-2 p-3 bg-white rounded-md shadow-sm border border-gray-200">
+              <div class="flex-1">
+                <a 
+                  href={link.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="text-brand-600 hover:text-brand-700"
+                >
+                  {link.title || link.url}
+                </a>
+                {link.description && (
+                  <p class="mt-1 text-sm text-gray-500">{link.description}</p>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        {links.length === 0 && (
+          <p class="text-gray-500 text-center py-4">This list is empty</p>
+        )}
+      </div>
+
+      <div class="flex justify-center">
+        <a
+          href="/"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-brand-700 bg-brand-50 hover:bg-brand-100"
+        >
+          Create your own list
+        </a>
+      </div>
+    </div>
+  </main>
+</Layout>

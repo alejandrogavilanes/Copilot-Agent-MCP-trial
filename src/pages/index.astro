@@ -1,0 +1,102 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { userLists, createList } from '../stores/link-lists';
+import Button from '../components/Button.astro';
+
+let error = '';
+if (Astro.request.method === 'POST') {
+  try {
+    const data = await Astro.request.formData();
+    const title = data.get('title')?.toString();
+    const description = data.get('description')?.toString();
+    
+    if (title) {
+      const list = await createList(title, description);
+      return Astro.redirect(`/lists/${list.slug}`);
+    }
+  } catch (e) {
+    error = 'Failed to create list. Please try again.';
+  }
+}
+---
+
+<Layout title="The Urlist - Share Your Link Collections">
+  <main class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
+    <div class="text-center">
+      <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+        The Urlist
+      </h1>
+      <p class="mt-4 text-xl text-gray-500">
+        Create and share collections of links effortlessly
+      </p>
+    </div>
+
+    <div class="mt-12 max-w-lg mx-auto">
+      <div class="bg-white shadow-sm rounded-lg p-6">
+        <h2 class="text-lg font-medium text-gray-900">Create a New List</h2>
+        <form method="POST" class="mt-4 space-y-4">
+          {error && (
+            <div class="rounded-md bg-red-50 p-4">
+              <p class="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+          
+          <div>
+            <label for="title" class="block text-sm font-medium text-gray-700">
+              Title
+            </label>
+            <input
+              type="text"
+              name="title"
+              id="title"
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+              placeholder="My Awesome Links"
+            />
+          </div>
+
+          <div>
+            <label for="description" class="block text-sm font-medium text-gray-700">
+              Description (optional)
+            </label>
+            <textarea
+              name="description"
+              id="description"
+              rows={3}
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+              placeholder="A collection of my favorite resources..."
+            />
+          </div>
+
+          <Button type="submit" variant="primary" class="w-full">
+            Create List
+          </Button>
+        </form>
+      </div>
+
+      <div class="mt-12">
+        <h2 class="text-lg font-medium text-gray-900">Your Lists</h2>
+        <div class="mt-4 space-y-4">
+          {userLists.get().map((list) => (
+            <a
+              href={`/lists/${list.slug}`}
+              class="block bg-white shadow-sm rounded-lg p-6 hover:bg-gray-50"
+            >
+              <h3 class="text-lg font-medium text-gray-900">
+                {list.title || 'Untitled List'}
+              </h3>
+              {list.description && (
+                <p class="mt-1 text-gray-500">{list.description}</p>
+              )}
+              <div class="mt-2 flex items-center text-sm text-gray-500">
+                <span>{list.is_published ? 'Published' : 'Draft'}</span>
+                <span class="mx-2">&bull;</span>
+                <span>{new Date(list.created_at).toLocaleDateString()}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
