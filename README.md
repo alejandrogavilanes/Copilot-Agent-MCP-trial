@@ -4,6 +4,25 @@ Urlist is a web application that helps users organize, manage, and share collect
 
 The application is built using Astro.js for server-side rendering, Preact for interactive components, and Tailwind CSS for styling. It features automatic link validation, keyboard shortcuts for efficient navigation, and a responsive design that works across devices.
 
+This a Demo project and Copilot in agent mode with MCP to work with a local PostgresQL database, using the PRD (project requirements document) to build the solution.
+
+MCP server allows for Copilot to talk to the database directly from withn the repo when in Agent mode, this is incredibly powerful as it allows for full end to end build.
+
+### Warning 
+Copilot in agent mode with MCP is great, over all human oversign is needed to avoid security, compliance and structiual issues, also avoid black box syndrome. This great shows potencial for fast prototype that could get you 70 to 80 % of the way, but over all technical understanding is needed.
+
+## Pre-requisites
+
+- Nodejs and NPM installed
+- Visual Studio Code installed
+- Github Copilot extension installed on Visuals Studio Code
+- PostgreSQL database installed on local machine
+
+## References
+
+- For MCP server used https://mcp.so/server/postgres/modelcontextprotocol?tab=content NPX to run local server
+
+
 ## Repository Structure
 ```
 .
@@ -144,6 +163,3 @@ The application uses the following infrastructure components:
 - API routes for data manipulation
 - Link validation service runs as a background process
 
-## This a demo project ##
-
-This a demo project all code is for example only
